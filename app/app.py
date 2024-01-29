@@ -36,7 +36,8 @@ def get_sheets_data(sheet_id):
     SHEET_NAME = "フォームの回答 1"
 
     try:
-        service_sheets = build("sheets", "v4", credentials=authentication())
+        credentials = session['credentials']
+        service_sheets = build("sheets", "v4", credentials = credentials)
 
         spreadsheet = (
             service_sheets.spreadsheets().get(spreadsheetId=SHEET_ID).execute()
@@ -100,6 +101,7 @@ def oauth2callback():
     flow.fetch_token(authorization_response=request.url)  
     # flow.credentialsにアクセストークンとリフレッシュトークンが含まれる
     credentials = flow.credentials
+    session['credentials'] = credentials
     # 認証が完了した後のリダイレクト先にリダイレクト
     return redirect(url_for('index'))
 
@@ -161,7 +163,8 @@ def write_to_google_doc():
     selected_list = [[item for item in row if item != ""] for row in selected_list]
 
     try:
-        service = build("docs", "v1", credentials=authentication())
+        credentials = session['credentials']
+        service = build("docs", "v1", credentials=credentials)
         body = {"title": title}
         doc = service.documents().create(body=body).execute()
         document_id = doc.get("documentId")
