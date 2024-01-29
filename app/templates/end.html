@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アンケート自動まとめ</title>
+</head>
+
+<body>
+    <h1>アンケート自動まとめ</h1>
+    <p>アンケートまとめが作成されました。</p>
+    <!-- <p><a href="{{ document_url }}" target="_blank">ドキュメントを開く</a></p> -->
+    <button id="backButton">最初の画面に戻る</button>
+    <script>
+        // ボタンがクリックされたときの処理
+        backButton.addEventListener('click', () => {
+            // URLにリダイレクト
+            window.location.href = '/';
+        });
+    </script>
+</body>
+
+</html>

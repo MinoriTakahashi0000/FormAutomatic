@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/style.css">
+    <title>アンケート自動まとめ</title>
+    <script>
+        var sheets_data = {{ sheets_data | tojson }};
+    </script>
+</head>
+
+<body>
+    <div id="loading">
+        <div id="loadingMessage">アンケートまとめを作成中...</div>
+    </div>
+
+    <h1>アンケート自動まとめ</h1>
+    <div>
+        <h3>アンケートまとめのタイトルを入力してください</h3>
+        <input type="text" name="title_input" id="title_input" value="{{ sheets_title }}"><br /><br />
+    </div>
+    <div>
+        <h3>アンケートまとめに使用する項目を選択してください</h3>
+        <div>
+            <button id="all_select" onclick="all_select()">全選択</button>
+            <button id="all_deselect" onclick="all_deselect()">全解除</button>
+            <p>ーー読み込まれた質問項目ーー</p>
+            <script>
+                function all_select() {
+                    var checkboxes = document.getElementsByName("keys");
+                    checkboxes.forEach(function (checkbox) {
+                        checkbox.checked = true;
+                    });
+                }
+
+                function all_deselect() {
+                    var checkboxes = document.getElementsByName("keys");
+                    checkboxes.forEach(function (checkbox) {
+                        checkbox.checked = false;
+                    });
+                }
+            </script>
+        </div>
+        {% for question in keys %}
+        <input type="checkbox" id="{{ loop.index }}" name="keys" value="{{ question }}">
+        <label for="{{ loop.index }}">{{ question }}</label><br>
+        {% endfor %}
+    </div>
+    <button id="create" onclick="create()">作成</button>
+    <script>
+        function create() {
+            // ローディング画面を表示
+            document.getElementById('loading').style.display = 'block';
+
+            var titleValue = document.getElementById('title_input').value;
+
+            // チェックボックスの状態を取得
+            var checkboxes = document.getElementsByName("keys");
+            var selectedKeys = [];
+            checkboxes.forEach(function (checkbox) {
+                selectedKeys.push(checkbox.checked);
+            });
+
+            // タイトルと選択されたキーのリストをまとめてサーバーに送信
+            var requestData = {
+                sheets_data: sheets_data,
+                title: titleValue,
+                selectedKeys: selectedKeys
+            };
+
+            fetch("/create_document", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",  // ここでContent-Typeを正しく設定
+                },
+                body: JSON.stringify({
+                    requestData: requestData,
+                }),
+            })
+                .then(data => {
+                    // 成功時の処理
+                    console.log("successfuly!!")
+                    window.location.href = data.url;
+                })
+                .catch((error) => {
+                    // エラー時の処理
+                    console.error('URL is missing in the response');
+                });
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/style.css">
+    <title>アンケート自動まとめ</title>
+</head>
+
+<body>
+    <div id="loading">
+        <div id="loadingMessage">情報取得中...</div>
+    </div>
+    <form id="Form1" action="/process" method="post">
+        <h1>アンケート自動まとめ</h1>
+        <div>
+            <p>まとめたいGoogleスプレッドシートのURLを入力して下さい。</p>
+            <input type="text" name="url_input" id="url_input">
+            <button id="get_info" type="submit" onclick="submitForm()">情報取得</button>
+            <script>
+                function submitForm() {
+                    // ローディング画面を表示
+                    document.getElementById('loading').style.display = 'block';
+                    var form = document.getElementById("Form1");
+                    form.submit();
+                }
+            </script>
+        </div>
+    </form>
+</body>
+
+</html>
