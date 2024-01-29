@@ -10,32 +10,8 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-# スコープ
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/documents",
-]
-
-
-def authentication():
-    credentials = None
-    if os.path.exists("token.json"):
-        credentials = Credentials.from_authorized_user_file("token.json", SCOPES)
-    if not credentials or not credentials.valid:
-        if credentials and credentials.expired and credentials.refresh_token:
-            credentials.refresh(Request())
-        else:
-            # 環境変数から認証情報を取得
-            google_credentials = json.loads(os.getenv('GOOGLE_CREDENTIALS'))
-            flow = InstalledAppFlow.from_client_config(google_credentials, SCOPES)
-            credentials = flow.run_local_server(port=0)
-        with open("token.json", "w") as token:
-            token.write(credentials.to_json())
-    return credentials
-
-
 app = Flask(__name__)
-app.secret_key = "eihjfoq384yijf8ouawfjo"
+app.secret_key = "skldhjnvjlajhrkasmvkl34r89jl"
 # app.debug = True
 # toolbar = DebugToolbarExtension(app)
 
@@ -80,6 +56,49 @@ def get_sheets_data(sheet_id):
         print(err)
         return None
 
+# スコープ
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/documents",
+]
+
+# Google Cloud Consoleで設定したリダイレクトURI
+REDIRECT_URI = 'http://localhost:5000/oauth2callback'
+
+@app.route('/auth')
+def auth():
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI)
+    # 認証URLを生成
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true')
+    # 状態をセッションに保存
+    session['state'] = state
+    # ユーザーを認証URLにリダイレクト
+    return redirect(authorization_url)
+
+@app.route('/oauth2callback')
+def oauth2callback():
+    # 認証プロバイダから認証コードを取得
+    auth_code = request.args.get('code')
+
+    # 認証コードを使用してトークンを取得
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=SCOPES,
+        redirect_uri=REDIRECT_URI)
+    flow.fetch_token(code=auth_code)
+
+    # flow.credentialsにアクセストークンとリフレッシュトークンが含まれる
+    credentials = flow.credentials
+
+    # トークンをセッションやデータベースに保存するなどの処理をここに追加
+
+    # 認証が完了した後のリダイレクト先（例えばホームページなど）にリダイレクト
+    return redirect(url_for('index'))
 
 @app.route("/")
 def index():
