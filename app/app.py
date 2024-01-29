@@ -37,7 +37,7 @@ def get_sheets_data(sheet_id):
 
     try:
         credentials_json = session['credentials']
-        credentials = credentials.from_authorized_user_info(json.loads(credentials_json))
+        credentials = credentials_json.from_authorized_user_info(json.loads(credentials_json))
     
         service_sheets = build("sheets", "v4", credentials = credentials)
 
@@ -167,7 +167,7 @@ def write_to_google_doc():
 
     try:
         credentials_json = session['credentials']
-        credentials = credentials.from_authorized_user_info(json.loads(credentials_json))
+        credentials = credentials_json.from_authorized_user_info(json.loads(credentials_json))
         service = build("docs", "v1", credentials=credentials)
         body = {"title": title}
         doc = service.documents().create(body=body).execute()
