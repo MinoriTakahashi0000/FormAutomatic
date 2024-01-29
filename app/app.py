@@ -13,8 +13,8 @@ from googleapiclient.errors import HttpError
 
 app = Flask(__name__)
 app.secret_key = "skldhjnvjlajhrkasmvkl34r89jl"
-# app.debug = True
-# toolbar = DebugToolbarExtension(app)
+app.debug = True
+toolbar = DebugToolbarExtension(app)
 
 
 # urlからidを抽出する関数
