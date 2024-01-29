@@ -64,7 +64,7 @@ SCOPES = [
 ]
 
 # Google Cloud Consoleで設定したリダイレクトURI
-REDIRECT_URI = 'http://localhost:5000/oauth2callback'
+REDIRECT_URI = 'https://formautomatic.onrender.com/oauth2callback'
 
 @app.route('/auth')
 def auth():
