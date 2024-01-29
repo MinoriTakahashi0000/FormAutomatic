@@ -1,4 +1,5 @@
 Flask
+flask-debugtoolbar
 gunicorn
 google-api-python-client
 google-auth-httplib2
