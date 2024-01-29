@@ -26,8 +26,10 @@ def authentication():
         if credentials and credentials.expired and credentials.refresh_token:
             credentials.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-        credentials = flow.run_local_server(port=0)
+            # 環境変数から認証情報を取得
+            google_credentials = json.loads(os.getenv('GOOGLE_CREDENTIALS'))
+            flow = InstalledAppFlow.from_client_config(google_credentials, SCOPES)
+            credentials = flow.run_local_server(port=0)
         with open("token.json", "w") as token:
             token.write(credentials.to_json())
     return credentials
