@@ -84,25 +84,24 @@ def auth():
     # ユーザーを認証URLにリダイレクト
     return redirect(authorization_url)
 
+
 @app.route('/oauth2callback')
 def oauth2callback():
-    # 認証プロバイダから認証コードを取得
-    auth_code = request.args.get('code')
-
-    # 認証コードを使用してトークンを取得
-    flow = Flow.from_client_secrets_file(
-        'credentials.json',
+    # 環境変数から認証情報を読み込む
+    credentials_info = json.loads(os.getenv('GOOGLE_CREDENTIALS'))
+    # Flowオブジェクトを再初期化
+    flow = Flow.from_client_config(
+        client_config=credentials_info,
         scopes=SCOPES,
+        state=session['state'],
         redirect_uri=REDIRECT_URI)
-    flow.fetch_token(code=auth_code)
-
+    # リクエストから認証コードを取得し、アクセストークンに交換
+    flow.fetch_token(authorization_response=request.url)  
     # flow.credentialsにアクセストークンとリフレッシュトークンが含まれる
     credentials = flow.credentials
-
-    # トークンをセッションやデータベースに保存するなどの処理をここに追加
-
-    # 認証が完了した後のリダイレクト先（例えばホームページなど）にリダイレクト
+    # 認証が完了した後のリダイレクト先にリダイレクト
     return redirect(url_for('index'))
+
 
 @app.route("/")
 def index():
