@@ -3,7 +3,6 @@ import datetime
 import json
 import os.path
 import webbrowser
-from urllib.parse import unquote_plus, quote_plus
 from flask import Flask, render_template, request, redirect, url_for
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
