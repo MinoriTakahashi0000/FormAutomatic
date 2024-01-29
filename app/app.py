@@ -68,8 +68,11 @@ REDIRECT_URI = 'http://localhost:5000/oauth2callback'
 
 @app.route('/auth')
 def auth():
-    flow = Flow.from_client_secrets_file(
-        'credentials.json',
+    # 環境変数から認証情報を読み込む
+    credentials_info = json.loads(os.getenv('GOOGLE_CREDENTIALS')) 
+    # Flowオブジェクトを初期化
+    flow = Flow.from_client_config(
+        client_config=credentials_info,
         scopes=SCOPES,
         redirect_uri=REDIRECT_URI)
     # 認証URLを生成
