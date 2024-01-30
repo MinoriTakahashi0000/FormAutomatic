@@ -1,9 +1,10 @@
 import re
 import datetime
 import json
-import os.path
+import os
 import webbrowser
-from flask import Flask, render_template, request, redirect, url_for, session
+import redis
+from flask import Flask, jsonify, render_template, request, redirect, url_for, session
 from flask_debugtoolbar import DebugToolbarExtension
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -12,10 +13,14 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
 app = Flask(__name__)
 app.secret_key = "skldhjnvjlajhrkasmvkl34r89jl"
-app.debug = True
-toolbar = DebugToolbarExtension(app)
+# app.debug = True
+# toolbar = DebugToolbarExtension(app)
+
+r = redis.Redis()
 
 
 # urlからidを抽出する関数
@@ -36,10 +41,12 @@ def get_sheets_data(sheet_id):
     SHEET_NAME = "フォームの回答 1"
 
     try:
-        credentials_json = session['credentials']
-        credentials = Credentials.from_authorized_user_info(json.loads(credentials_json))
-    
-        service_sheets = build("sheets", "v4", credentials = credentials)
+        credentials_json = session["credentials"]
+        credentials = Credentials.from_authorized_user_info(
+            json.loads(credentials_json)
+        )
+
+        service_sheets = build("sheets", "v4", credentials=credentials)
 
         spreadsheet = (
             service_sheets.spreadsheets().get(spreadsheetId=SHEET_ID).execute()
@@ -54,11 +61,11 @@ def get_sheets_data(sheet_id):
             .execute()
         )
         values = result.get("values", [])
-        session['sheets_title'] = title
-        return values
+        return values, title
     except HttpError as err:
         print(err)
         return None
+
 
 # スコープ
 SCOPES = [
@@ -118,30 +125,32 @@ def index():
 def process():
     url = request.form["url_input"]
     id = extract_id(url)
-    sheets_data = get_sheets_data(id)
-    return redirect(
-        url_for(
-            "results", sheets_data=sheets_data
-        )
-    )
+    sheets_data, sheets_title = get_sheets_data(id)
+    json_sheets_data = json.dumps(sheets_data)
+    r.set("sheets_data", json_sheets_data)
+    json_sheets_title = json.dumps(sheets_title)
+    r.set("sheets_title", json_sheets_title)
+    return redirect(url_for("results"))
 
 
 @app.route("/results")
 def results():
-    sheets_data = request.args.get("sheets_data", "Unknown")
-    sheets_title = session['sheets_title']
+    json_sheets_data = r.get("sheets_data")
+    json_sheets_title = r.get("sheets_title")
+
+    sheets_data = json.loads(json_sheets_data)
+    sheets_title = json.loads(json_sheets_title)
+
     keys = sheets_data[0]
-    return render_template(
-        "results.html", sheets_title=sheets_title, keys=keys, sheets_data=sheets_data
-    )
+    return render_template("results.html", sheets_title=sheets_title, keys=keys)
 
 
 @app.route("/create_document", methods=["GET", "POST"])
 def write_to_google_doc():
+    json_sheets_data = r.get("sheets_data")
+    sheets_data = json.loads(json_sheets_data)
     # POSTリクエストからJSONデータを取得
     request_data = request.get_json()
-    sheets_data = request_data.get("requestData", {}).get("sheets_data")
-    sheets_data = json.loads(sheets_data)
     title = request_data.get("requestData", {}).get("title")
     selected_keys = request_data.get("requestData", {}).get("selectedKeys")
 
@@ -161,8 +170,10 @@ def write_to_google_doc():
     selected_list = [[item for item in row if item != ""] for row in selected_list]
 
     try:
-        credentials_json = session['credentials']
-        credentials = Credentials.from_authorized_user_info(json.loads(credentials_json))
+        credentials_json = session["credentials"]
+        credentials = Credentials.from_authorized_user_info(
+            json.loads(credentials_json)
+        )
         service = build("docs", "v1", credentials=credentials)
         body = {"title": title}
         doc = service.documents().create(body=body).execute()
@@ -339,7 +350,10 @@ def write_to_google_doc():
             documentId=document_id, body={"requests": requests}
         ).execute()
         webbrowser.open(document_url, new=2)
-        return redirect(url_for("end"))
+        return (
+            jsonify({"status": "success", "message": "Document created successfully."}),
+            200,
+        )
     except HttpError as err:
         print(err)
 
