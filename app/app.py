@@ -54,9 +54,8 @@ def get_sheets_data(sheet_id):
             .execute()
         )
         values = result.get("values", [])
-        session['sheets_data'] = values
         session['sheets_title'] = title
-        return
+        return values
     except HttpError as err:
         print(err)
         return None
@@ -119,17 +118,17 @@ def index():
 def process():
     url = request.form["url_input"]
     id = extract_id(url)
-    get_sheets_data(id)
+    sheets_data = get_sheets_data(id)
     return redirect(
         url_for(
-            "results"
+            "results", sheets_data=sheets_data
         )
     )
 
 
 @app.route("/results")
 def results():
-    sheets_data = session['sheets_data']
+    sheets_data = request.args.get("sheets_data", "Unknown")
     sheets_title = session['sheets_title']
     keys = sheets_data[0]
     return render_template(
