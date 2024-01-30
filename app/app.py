@@ -54,9 +54,9 @@ def get_sheets_data(sheet_id):
             .execute()
         )
         values = result.get("values", [])
-
-        return values, title
-
+        session['sheets_data'] = values
+        session['sheets_title'] = title
+        return
     except HttpError as err:
         print(err)
         return None
@@ -119,12 +119,11 @@ def index():
 def process():
     url = request.form["url_input"]
     id = extract_id(url)
-    sheets_data, sheets_title = get_sheets_data(id)
-    session['sheets_data'] = sheets_data
-    session['sheets_title'] = sheets_title
+    get_sheets_data(id)
+    # session['sheets_data'] = sheets_data
+    # session['sheets_title'] = sheets_title
     # 質問取り出す
     keys = json.dumps(sheets_data[0])
-    sheets_data = json.dumps(sheets_data)
 
     return redirect(
         url_for(
