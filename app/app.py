@@ -128,15 +128,15 @@ def process():
 
     return redirect(
         url_for(
-            "results", sheets_data=sheets_data, sheets_title=sheets_title, keys=keys
+            "results", keys=keys
         )
     )
 
 
 @app.route("/results")
 def results():
-    sheets_data = request.args.get("sheets_data", "Unknown")
-    sheets_title = request.args.get("sheets_title", "Unknown")
+    sheets_data = session['sheets_data']
+    sheets_title = session['sheets_title']
     keys = request.args.get("keys", "Unknown")
     keys = json.loads(keys)
     return render_template(
