@@ -6,9 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/style.css">
     <title>アンケート自動まとめ</title>
-    <script>
-        var sheets_data = {{ sheets_data | tojson }};
-    </script>
 </head>
 
 <body>
@@ -65,7 +62,6 @@
 
             // タイトルと選択されたキーのリストをまとめてサーバーに送信
             var requestData = {
-                sheets_data: sheets_data,
                 title: titleValue,
                 selectedKeys: selectedKeys
             };
@@ -79,14 +75,18 @@
                     requestData: requestData,
                 }),
             })
-                .then(data => {
-                    // 成功時の処理
-                    console.log("successfuly!!")
-                    window.location.href = data.url;
+                .then(response => {
+                    if (response.ok) {
+                        // レスポンスが成功した場合、'/end'にリダイレクト
+                        window.location.href = '/end';
+                    } else {
+                        // レスポンスに問題がある場合、エラーメッセージをログに出力
+                        console.error('Something went wrong with the response.');
+                    }
                 })
                 .catch((error) => {
-                    // エラー時の処理
-                    console.error('URL is missing in the response');
+                    // ネットワークエラーなどの問題が発生した場合の処理
+                    console.error('Error:', error);
                 });
         }
     </script>
