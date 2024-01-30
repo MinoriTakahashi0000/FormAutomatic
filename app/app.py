@@ -81,8 +81,9 @@ def auth():
         redirect_uri=REDIRECT_URI)
     # 認証URLを生成
     authorization_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true')
+        access_type='offline',  # オフラインアクセスを要求（リフレッシュトークンが必要）
+        include_granted_scopes='true',
+        prompt='consent')  # ユーザーに再承認を要求
     # 状態をセッションに保存
     session['state'] = state
     # ユーザーを認証URLにリダイレクト
