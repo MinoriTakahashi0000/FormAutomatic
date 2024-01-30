@@ -120,6 +120,8 @@ def process():
     url = request.form["url_input"]
     id = extract_id(url)
     sheets_data, sheets_title = get_sheets_data(id)
+    session['sheets_data'] = sheets_data
+    session['sheets_title'] = sheets_title
     # 質問取り出す
     keys = json.dumps(sheets_data[0])
     sheets_data = json.dumps(sheets_data)
