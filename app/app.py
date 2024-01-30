@@ -120,14 +120,9 @@ def process():
     url = request.form["url_input"]
     id = extract_id(url)
     get_sheets_data(id)
-    # session['sheets_data'] = sheets_data
-    # session['sheets_title'] = sheets_title
-    # 質問取り出す
-    keys = json.dumps(sheets_data[0])
-
     return redirect(
         url_for(
-            "results", keys=keys
+            "results"
         )
     )
 
@@ -136,8 +131,7 @@ def process():
 def results():
     sheets_data = session['sheets_data']
     sheets_title = session['sheets_title']
-    keys = request.args.get("keys", "Unknown")
-    keys = json.loads(keys)
+    keys = sheets_data[0]
     return render_template(
         "results.html", sheets_title=sheets_title, keys=keys, sheets_data=sheets_data
     )
