@@ -79,6 +79,7 @@
                     if (response.ok) {
                         // レスポンスが成功した場合、'/end'にリダイレクト
                         window.location.href = '/end';
+                        window.open(document_url,"_blank");
                     } else {
                         // レスポンスに問題がある場合、エラーメッセージをログに出力
                         console.error('Something went wrong with the response.');
