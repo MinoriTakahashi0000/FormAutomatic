@@ -81,19 +81,26 @@
                     } else {
                         // レスポンスに問題がある場合、エラーメッセージをログに出力
                         console.error('Something went wrong with the response.');
+                        throw new Error('Response not OK.');
                     }
                 })
                 .then(data => {
-                    // JSON解析後のデータを処理
-                    window.location.href = '/end';
-                    window.open(data.url, "_blank");
-                    console.log("data.url":::,data.url)
+                    if (data.url) {
+                        // URLが存在する場合、新しいタブでURLを開く
+                        window.open(data.url, "_blank");
+                        console.log("data.url:", data.url);
+                        window.location.href = '/end';  // JSON解析後のデータを処理
+                    } else {
+                        // URLが存在しない場合の処理
+                        console.error('URL is missing in the response data.');
+                    }
                 })
                 .catch((error) => {
                     // ネットワークエラーなどの問題が発生した場合の処理
                     console.error('Error:', error);
-                })
+                });
         }
+
     </script>
 </body>
 
