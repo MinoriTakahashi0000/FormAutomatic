@@ -20,7 +20,11 @@ app.secret_key = "skldhjnvjlajhrkasmvkl34r89jl"
 # app.debug = True
 # toolbar = DebugToolbarExtension(app)
 
-r = redis.Redis()
+redis_host = os.getenv("REDIS_HOST") 
+redis_port = os.getenv("REDIS_PORT")
+
+# Redisクライアントの初期化
+r = redis.Redis(host=redis_host, port=redis_port)
 
 
 # urlからidを抽出する関数
