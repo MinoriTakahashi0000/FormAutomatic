@@ -87,6 +87,7 @@
                     // JSON解析後のデータを処理
                     window.location.href = '/end';
                     window.open(data.url, "_blank");
+                    console.log("data.url":::,data.url)
                 })
                 .catch((error) => {
                     // ネットワークエラーなどの問題が発生した場合の処理
