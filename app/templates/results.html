@@ -77,14 +77,16 @@
             })
                 .then(response => {
                     if (response.ok) {
-                        // レスポンスが成功した場合、'/end'にリダイレクト
-                        window.location.href = '/end';
-                        window.open(document_url,"_blank");
+                        return response.json(); 
                     } else {
                         // レスポンスに問題がある場合、エラーメッセージをログに出力
                         console.error('Something went wrong with the response.');
                     }
                 })
+                .then(data => {
+                    // JSON解析後のデータを処理
+                    window.location.href = '/end';
+                    window.open(data.url,"_blank");
                 .catch((error) => {
                     // ネットワークエラーなどの問題が発生した場合の処理
                     console.error('Error:', error);
