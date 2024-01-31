@@ -353,10 +353,8 @@ def write_to_google_doc():
         service.documents().batchUpdate(
             documentId=document_id, body={"requests": requests}
         ).execute()
-        webbrowser.open(document_url, new=2)
         return (
-            jsonify({"status": "success", "message": "Document created successfully."}),
-            200,
+            jsonify({'url': document_url})
         )
     except HttpError as err:
         print(err)
