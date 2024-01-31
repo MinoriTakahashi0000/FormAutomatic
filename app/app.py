@@ -122,7 +122,9 @@ def oauth2callback():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # セッションから認証情報を取得し、認証状態をチェック
+    is_authenticated = 'credentials' in session
+    return render_template("index.html", is_authenticated=is_authenticated)
 
 
 @app.route("/process", methods=["POST"])
